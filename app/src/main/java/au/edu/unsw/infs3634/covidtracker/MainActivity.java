@@ -1,16 +1,18 @@
 package au.edu.unsw.infs3634.covidtracker;
 
+import android.os.Bundle;
+import android.widget.Button;
+
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.os.Bundle;
+public class MainActivity extends AppCompatActivity {
 
-public class MainActivity<Private> extends AppCompatActivity {
-    private String TAG = "MainActivity";
-    private int age = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Button button = findViewById(R.id.btnLaunchActivity);
+        button.setText("Text changes");
     }
 }
