@@ -31,6 +31,7 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
     }
+
     public void openYoutube() {
         Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=Tlwda9s58Lg&ab_channel=Fireballfury"));
     startActivity(intent);}
