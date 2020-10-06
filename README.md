@@ -1,4 +1,4 @@
-# CovidTracker 🦠
+# CovidTracker
 
 CovidTracker is a comprehensive Coronavirus app that provides data on COVID19 new and total cases per country updated daily.
 
