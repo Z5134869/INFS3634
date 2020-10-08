@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">CovidTracker</string>
+    <string name="hello_world_from_mainactivity">Hello World from MainActivity!</string>
+    <string name="launch_detail_activity">Launch Detail Activity</string>
 </resources>
