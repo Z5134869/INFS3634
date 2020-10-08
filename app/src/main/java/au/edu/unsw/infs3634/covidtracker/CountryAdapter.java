@@ -13,15 +13,21 @@ import java.util.ArrayList;
 
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryViewHolder> {
     private ArrayList<Country> mCountries;
-    public CountryAdapter(ArrayList<Country> countries){
+    private Listener mListener;
+
+    public CountryAdapter(ArrayList<Country> countries, Listener listener){
         mCountries = countries;
+        mListener = listener;
+    }
+    public interface Listener{
+        void onClick(View view, String countryCode);
     }
     @NonNull
     @Override
     public CountryAdapter.CountryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
 
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.country_list_row, parent, false);
-        CountryViewHolder holder = new CountryViewHolder((v));
+        CountryViewHolder holder = new CountryViewHolder(v, mListener);
         return holder;
     }
 
@@ -39,14 +45,23 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
     public int getItemCount() {
         return mCountries.size();
     }
-    public class CountryViewHolder extends RecyclerView.ViewHolder{
-        public TextView country, totalCases, newCases;
 
-        public CountryViewHolder(@NonNull View itemView){
+    public class CountryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+        public TextView country, totalCases, newCases;
+        private Listener listener;
+
+        public CountryViewHolder(@NonNull View itemView, Listener listener){
             super(itemView);
+            this.listener = listener;
+            itemView.setOnClickListener(this);
             country = itemView.findViewById(R.id.tvCountry);
             totalCases = itemView.findViewById(R.id.tvTotalCases);
             newCases = itemView.findViewById(R.id.tvNewCases);
+        }
+
+        @Override
+        public void onClick(View v) {
+        listener.onClick(v, (String) v.getTag());
         }
     }
 }
