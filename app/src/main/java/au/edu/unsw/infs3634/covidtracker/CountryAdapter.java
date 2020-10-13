@@ -13,31 +13,31 @@ import java.util.ArrayList;
 
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryViewHolder> {
     private ArrayList<Country> mCountries;
-    private Listener mListener;
+    private RecyclerViewClickListener mListener;
 
-    public CountryAdapter(ArrayList<Country> countries, Listener listener){
+    public CountryAdapter(ArrayList<Country> countries, RecyclerViewClickListener listener) {
         mCountries = countries;
         mListener = listener;
     }
-    public interface Listener{
+
+    public interface RecyclerViewClickListener {
         void onClick(View view, String countryCode);
     }
+
     @NonNull
     @Override
-    public CountryAdapter.CountryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
+    public CountryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.country_list_row, parent, false);
-        CountryViewHolder holder = new CountryViewHolder(v, mListener);
-        return holder;
+        return new CountryViewHolder(v, mListener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CountryAdapter.CountryViewHolder holder, int position) {
-    Country country = mCountries.get(position);
-        DecimalFormat df = new DecimalFormat("#,###,###,###");
+    public void onBindViewHolder(@NonNull CountryViewHolder holder, int position) {
+        Country country = mCountries.get(position);
+        DecimalFormat df = new DecimalFormat( "#,###,###,###" );
         holder.country.setText(country.getCountry());
         holder.totalCases.setText(df.format(country.getTotalConfirmed()));
-        holder.totalCases.setText(df.format(country.getNewConfirmed()));
+        holder.newCases.setText("+" + df.format(country.getNewConfirmed()));
         holder.itemView.setTag(country.getCountryCode());
     }
 
@@ -46,11 +46,11 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         return mCountries.size();
     }
 
-    public class CountryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public static class CountryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView country, totalCases, newCases;
-        private Listener listener;
+        private RecyclerViewClickListener listener;
 
-        public CountryViewHolder(@NonNull View itemView, Listener listener){
+        public CountryViewHolder(@NonNull View itemView, RecyclerViewClickListener listener) {
             super(itemView);
             this.listener = listener;
             itemView.setOnClickListener(this);
@@ -61,7 +61,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
 
         @Override
         public void onClick(View v) {
-        listener.onClick(v, (String) v.getTag());
+            listener.onClick(v, (String) v.getTag());
         }
     }
 }

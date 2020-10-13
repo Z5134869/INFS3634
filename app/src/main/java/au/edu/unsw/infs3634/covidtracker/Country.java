@@ -122,14 +122,5 @@ public class Country {
         countries.add(new Country("Spain","ES","spain",5114,364196,24,28670,0,150376,"2020-08-19T08:46:16Z"));
         return countries;
     }
-    public static Country getCountry(String countryCode){
-        ArrayList<Country> countries = Country.getCountries();
-        for(final Country country : countries){
-            if (country.getCountryCode().equals(countryCode)){
-                return country;
-            }
-        }
-        return countries.get(countries.size()-1);
-    }
 
 }
