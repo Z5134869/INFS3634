@@ -18,11 +18,11 @@ import java.util.Comparator;
 import java.util.List;
 
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryViewHolder> implements Filterable {
-    private ArrayList<Country> mCountries;
+    private List<Country> mCountries;
     private Listener mListener;
-    private ArrayList<Country> mCountriesFiltered;
+    private List<Country> mCountriesFiltered;
 
-    public CountryAdapter(ArrayList<Country> countries, Listener listener) {
+    public CountryAdapter(List<Country> countries, Listener listener) {
         mCountries = countries;
         mCountriesFiltered = countries;
         mListener = listener;
@@ -37,7 +37,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
                 if (searchQuery.isEmpty()) {
                     mCountriesFiltered = mCountries;
                 } else {
-                    ArrayList<Country> filterList = new ArrayList<>();
+                    List<Country> filterList = new ArrayList<>();
                     for (Country country : mCountries) {
                         if (country.getCountry().toLowerCase().contains(searchQuery.toLowerCase())) {
                             filterList.add(country);
@@ -52,7 +52,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
 
             @Override
             protected void publishResults(CharSequence constraint, FilterResults results) {
-                mCountriesFiltered = (ArrayList<Country>) results.values;
+                mCountriesFiltered = (List<Country>) results.values;
                 notifyDataSetChanged();
             }
         };
@@ -106,24 +106,21 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
     }
 
     public void sort(final int sortMethod) {
-        // sort the list
+
         if (mCountriesFiltered.size() > 0) {
             Collections.sort(mCountriesFiltered, new Comparator<Country>() {
                 @Override
                 public int compare(Country o1, Country o2) {
                     if (sortMethod == 1) {
-                        // sort by new cases
                         return o2.getNewConfirmed().compareTo(o1.getNewConfirmed());
                     } else {
-                        // sort by total cases
                         o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                     }
-                    // default
                     return o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                 }
             });
         }
-        // notify the adapter on changed
+
         notifyDataSetChanged();
     }
 }

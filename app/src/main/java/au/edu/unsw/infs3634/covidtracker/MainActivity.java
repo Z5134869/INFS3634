@@ -12,6 +12,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
 
+import com.google.gson.Gson;
+
 public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager layoutManager;
@@ -33,7 +35,10 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mAdapter = new CountryAdapter(Country.getCountries(), listener);
+
+        Gson gson = new Gson();
+        Response response =gson.fromJson(Response.json, Response.class);
+        mAdapter = new CountryAdapter(response.getCountries(), listener);
         mRecyclerView.setAdapter(mAdapter);
 
     }
@@ -70,10 +75,10 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.sort_new:
                 mAdapter.sort(1);
-            return true;
+                return true;
             case R.id.sort_total:
                 mAdapter.sort(2);
-                default:
+            default:
                 return super.onOptionsItemSelected(item);
         }
     }

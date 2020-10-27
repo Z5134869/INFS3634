@@ -1,10 +1,7 @@
 <resources>
-    <string name="app_name">CovidTracker 2020</string>
-    <string name="app_msg">Hello Covid Tracker App! </string>
-    <string name="app_intro_msg">Hello from the Main Activity Layout! </string>
-    <string name="sort_new">New Cases </string>
-    <string name="sort_total">Total Cases </string>
-    <string name="action_sort">Sort </string>
-    <string name="action_search">Search </string>
-
+    <string name="app_name">CovidTracker</string>
+    <string name="sort_new">New Cases</string>
+    <string name="sort_total">Total Cases</string>
+    <string name="action_sort">Sort</string>
+    <string name="action_search">Search</string>
 </resources>
