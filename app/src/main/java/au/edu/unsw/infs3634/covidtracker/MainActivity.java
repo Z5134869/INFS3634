@@ -11,10 +11,8 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.SearchView;
 
-import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -47,7 +45,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mAdapter = new CountryAdapter(new ArrayList<Country>(), listener, getApplicationContext());
+        mAdapter = new CountryAdapter(new ArrayList<Country>(), listener);
         mRecyclerView.setAdapter(mAdapter);
 
         Retrofit retrofit = new Retrofit.Builder()
@@ -74,6 +72,8 @@ public class MainActivity extends AppCompatActivity {
         // use Gson library to convert json data to java class
 //        Gson gson = new Gson();
 //        Response response = gson.fromJson(Response.json, Response.class);
+
+
     }
 
     private void launchDetailActivity(String message) {

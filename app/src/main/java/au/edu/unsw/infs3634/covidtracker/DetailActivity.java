@@ -1,17 +1,14 @@
 package au.edu.unsw.infs3634.covidtracker;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.List;
 
@@ -31,7 +28,6 @@ public class DetailActivity extends AppCompatActivity {
     private TextView mNewRecovered;
     private TextView mTotalRecovered;
     private ImageView mSearch;
-    private ImageView mFlag;
 
 
     @Override
@@ -54,9 +50,9 @@ public class DetailActivity extends AppCompatActivity {
             public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
                 Log.d(TAG, "onResponse: API call succeeded!");
                 List<Country> countries = response.body().getCountries();
-                final Country country = Country.findCountry(countries, countryCode);
+                final Country country = Country.getCountry(countries, countryCode);
 
-                mCountry = findViewById(R.id.tvCountryName);
+                mCountry = findViewById(R.id.tvCountry);
                 mNewCases = findViewById(R.id.tvNewCasesDesc);
                 mTotalCases = findViewById(R.id.tvTotalCasesDesc);
                 mNewDeaths = findViewById(R.id.tvNewDeathsDesc);
@@ -90,8 +86,7 @@ public class DetailActivity extends AppCompatActivity {
             }
         });
 
-        mFlag = findViewById(R.id.ivFlag);
-        Glide.with(this).load("https://www.countryflags.io/"+ countryCode + "/flat/64.png").into(mFlag);
+
 
 
 

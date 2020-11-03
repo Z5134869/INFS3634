@@ -130,16 +130,14 @@ public class Country {
     }
 
 
-    public static Country findCountry(List<Country> countries, String countryCode) {
-//        Gson gson = new Gson();
-//        Response response = gson.fromJson(Response.json, Response.class);
-//        List<Country> countries = response.getCountries();
-        for (final Country country: countries) {
-            if (country.getCountryCode().equals(countryCode)) {
+    public static Country getCountry(List<Country> countries, String countryCode){
+
+        for(final Country country: countries){
+            if(country.getCountryCode().equals(countryCode)){
                 return country;
             }
         }
-        return countries.get(countries.size() - 1);
+        return countries.get(countries.size()-1);
     }
 
 }

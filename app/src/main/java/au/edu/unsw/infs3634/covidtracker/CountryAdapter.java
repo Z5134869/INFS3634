@@ -1,36 +1,30 @@
 package au.edu.unsw.infs3634.covidtracker;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.bumptech.glide.Glide;
-
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryViewHolder> implements Filterable {
     private List<Country> mCountries;
     private Listener mListener;
     private List<Country> mCountriesFiltered;
-    private Context mContext;
 
-    public CountryAdapter(List<Country> countries, Listener listener, Context context) {
+    public CountryAdapter(List<Country> countries, Listener listener) {
         mCountries = countries;
         mCountriesFiltered = countries;
         mListener = listener;
-        mContext = context;
     }
 
     @Override
@@ -67,7 +61,6 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         void onClick(View view, String countryCode);
     }
 
-
     @NonNull
     @Override
     public CountryAdapter.CountryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -85,7 +78,6 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         holder.totalCases.setText(df.format(country.getTotalConfirmed()));
         holder.newCases.setText(df.format(country.getNewConfirmed()));
         holder.itemView.setTag(country.getCountryCode());
-        Glide.with(mContext).load("https://www.countryflags.io/"+ country.getCountryCode() + "/flat/64.png").into(holder.flag);
     }
 
     @Override
@@ -96,7 +88,6 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
     public class CountryViewHolder extends RecyclerView.ViewHolder implements  View.OnClickListener {
         public TextView country, totalCases, newCases;
         private Listener listener;
-        private ImageView flag;
 
         public CountryViewHolder(@NonNull View itemView, Listener listener) {
             super(itemView);
@@ -105,7 +96,6 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
             country = itemView.findViewById(R.id.tvCountry);
             totalCases = itemView.findViewById(R.id.tvTotalCases);
             newCases = itemView.findViewById(R.id.tvNewCases);
-            flag = itemView.findViewById(R.id.ivFlag);
         }
 
         @Override
@@ -113,7 +103,6 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
             listener.onClick(v, (String) v.getTag());
         }
     }
-
     public void setData(List<Country> data){
         mCountriesFiltered.clear();
         mCountriesFiltered.addAll(data);
@@ -121,24 +110,21 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
     }
 
     public void sort(final int sortMethod) {
-        // sort the list
+
         if (mCountriesFiltered.size() > 0) {
             Collections.sort(mCountriesFiltered, new Comparator<Country>() {
                 @Override
                 public int compare(Country o1, Country o2) {
                     if (sortMethod == 1) {
-                        // sort by new cases
                         return o2.getNewConfirmed().compareTo(o1.getNewConfirmed());
                     } else {
-                        // sort by total cases
                         o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                     }
-                    // default
                     return o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                 }
             });
         }
-        // notify the adapter on changed
+
         notifyDataSetChanged();
     }
 }
