@@ -5,19 +5,24 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
+import com.bumptech.glide.Glide;
 
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.List;
 
-public class DetailActivity extends AppCompatActivity {
-    public static final String INTENT_MESSAGE = "au.edu.unsw.infs3634.covidtracker.intent_message";
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
+public class DetailActivity extends AppCompatActivity {
+    private static final String TAG = "DetailActivity";
+    public static final String INTENT_MESSAGE = "au.edu.unsw.infs3634.covidtracker.intent_message";
     private TextView mCountry;
     private TextView mNewCases;
     private TextView mTotalCases;
@@ -26,50 +31,83 @@ public class DetailActivity extends AppCompatActivity {
     private TextView mNewRecovered;
     private TextView mTotalRecovered;
     private ImageView mSearch;
+    private ImageView mFlag;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        mCountry = findViewById(R.id.tvCountry);
-        mNewCases = findViewById(R.id.tvNewCases);
-        mTotalCases = findViewById(R.id.tvTotalCases);
-        mNewDeaths = findViewById(R.id.tvNewDeaths);
-        mTotalDeaths = findViewById(R.id.tvTotalDeaths);
-        mNewRecovered = findViewById(R.id.tvNewRecovered);
-        mTotalRecovered = findViewById(R.id.tvTotalRecovered);
-        mSearch = findViewById(R.id.ivSearch);
-
         Intent intent = getIntent();
         String countryCode = intent.getStringExtra(INTENT_MESSAGE);
 
-        Gson gson = new Gson();
-        Response response = gson.fromJson(Response.json, Response.class);
-        List<Country> countries = response.getCountries();
-        for(final Country country : countries) {
-            if(country.getCountryCode().equals(countryCode)) {
-                DecimalFormat df = new DecimalFormat( "#,###,###,###" );
-                setTitle(country.getCountryCode());
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://api.covid19api.com")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        CovidService service = retrofit.create(CovidService.class);
+        Call<Response> responseCall = service.getResponse();
+        responseCall.enqueue(new Callback<Response>() {
+            @Override
+            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+                Log.d(TAG, "onResponse: API call succeeded!");
+                List<Country> countries = response.body().getCountries();
+                final Country country = Country.findCountry(countries, countryCode);
+
+                mCountry = findViewById(R.id.tvCountryName);
+                mNewCases = findViewById(R.id.tvNewCasesDesc);
+                mTotalCases = findViewById(R.id.tvTotalCasesDesc);
+                mNewDeaths = findViewById(R.id.tvNewDeathsDesc);
+                mTotalDeaths = findViewById(R.id.tvTotalDeathsDesc);
+                mNewRecovered = findViewById(R.id.tvNewRecoveredDesc);
+                mTotalRecovered = findViewById(R.id.tvTotalRecoveredDesc);
+
                 mCountry.setText(country.getCountry());
-                mNewCases.setText(df.format(country.getNewConfirmed()));
-                mTotalCases.setText(df.format(country.getTotalConfirmed()));
-                mNewDeaths.setText(df.format(country.getNewDeaths()));
-                mTotalDeaths.setText(df.format(country.getTotalDeaths()));
-                mNewRecovered.setText(df.format(country.getNewRecovered()));
-                mTotalRecovered.setText(df.format(country.getTotalRecovered()));
+                mNewCases.setText(String.valueOf(country.getNewConfirmed()));
+                mTotalCases.setText(String.valueOf(country.getTotalConfirmed()));
+                mNewDeaths.setText(String.valueOf(country.getNewDeaths()));
+                mTotalDeaths.setText(String.valueOf(country.getTotalDeaths()));
+                mNewRecovered.setText(String.valueOf(country.getNewRecovered()));
+                mTotalRecovered.setText(String.valueOf(country.getTotalRecovered()));
+
+                mSearch = findViewById(R.id.ivSearch);
                 mSearch.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        searchCountry(country.getCountry());
+                        Intent intent = new Intent(Intent.ACTION_VIEW,
+                                Uri.parse("http://www.google.com/search?q=covid "
+                                        + country.getCountry()));
+                        startActivity(intent);
                     }
                 });
             }
-        }
-    }
 
-    private void searchCountry(String country) {
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=covid " + country));
-        startActivity(intent);
+            @Override
+            public void onFailure(Call<Response> call, Throwable t) {
+                Log.d(TAG, "onFailure: API call failed.");
+            }
+        });
+
+        mFlag = findViewById(R.id.ivFlag);
+        Glide.with(this).load("https://www.countryflags.io/"+ countryCode + "/flat/64.png").into(mFlag);
+
+
+
+//        TextView tv = findViewById(R.id.tvDetailMessage);
+//        tv.setText(country.getCountry());
+//        // TextView detailMessage = findViewById(R.id.tvDetailMessage);
+//        // detailMessage.setText(intent.getStringExtra(INTENT_MESSAGE));
+//
+//        Button button = findViewById(R.id.btnLink);
+//        button.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/"));
+//                startActivity(intent);
+//            }
+//        });
+
     }
 }

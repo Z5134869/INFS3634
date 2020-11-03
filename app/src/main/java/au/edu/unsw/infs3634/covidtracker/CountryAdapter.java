@@ -1,32 +1,36 @@
 package au.edu.unsw.infs3634.covidtracker;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryViewHolder> implements Filterable {
-    public static final int SORT_METHOD_NEW = 1;
-    public static final int SORT_METHOD_TOTAL = 2;
     private List<Country> mCountries;
+    private Listener mListener;
     private List<Country> mCountriesFiltered;
-    private RecyclerViewClickListener mListener;
+    private Context mContext;
 
-    public CountryAdapter(List<Country> countries, RecyclerViewClickListener listener) {
+    public CountryAdapter(List<Country> countries, Listener listener, Context context) {
         mCountries = countries;
         mCountriesFiltered = countries;
         mListener = listener;
+        mContext = context;
     }
 
     @Override
@@ -34,17 +38,17 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                String charString = constraint.toString();
-                if(charString.isEmpty()) {
+                String searchQuery = constraint.toString();
+                if (searchQuery.isEmpty()) {
                     mCountriesFiltered = mCountries;
                 } else {
-                    ArrayList<Country> filteredList = new ArrayList<>();
-                    for(Country country : mCountries) {
-                        if(country.getCountry().toLowerCase().contains(charString.toLowerCase())) {
-                            filteredList.add(country);
+                    List<Country> filterList = new ArrayList<>();
+                    for (Country country : mCountries) {
+                        if (country.getCountry().toLowerCase().contains(searchQuery.toLowerCase())) {
+                            filterList.add(country);
                         }
                     }
-                    mCountriesFiltered = filteredList;
+                    mCountriesFiltered = filterList;
                 }
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = mCountriesFiltered;
@@ -59,25 +63,29 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         };
     }
 
-    public interface RecyclerViewClickListener {
+    public interface Listener {
         void onClick(View view, String countryCode);
     }
 
+
     @NonNull
     @Override
-    public CountryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.country_list_row, parent, false);
-        return new CountryViewHolder(v, mListener);
+    public CountryAdapter.CountryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(
+                R.layout.country_list_row, parent, false);
+        CountryViewHolder holder = new CountryViewHolder(v, mListener);
+        return holder;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CountryViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CountryAdapter.CountryViewHolder holder, int position) {
         Country country = mCountriesFiltered.get(position);
-        DecimalFormat df = new DecimalFormat( "#,###,###,###" );
+        DecimalFormat df = new DecimalFormat("#,###,###,###");
         holder.country.setText(country.getCountry());
         holder.totalCases.setText(df.format(country.getTotalConfirmed()));
-        holder.newCases.setText("+" + df.format(country.getNewConfirmed()));
+        holder.newCases.setText(df.format(country.getNewConfirmed()));
         holder.itemView.setTag(country.getCountryCode());
+        Glide.with(mContext).load("https://www.countryflags.io/"+ country.getCountryCode() + "/flat/64.png").into(holder.flag);
     }
 
     @Override
@@ -85,17 +93,19 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         return mCountriesFiltered.size();
     }
 
-    public static class CountryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
+    public class CountryViewHolder extends RecyclerView.ViewHolder implements  View.OnClickListener {
         public TextView country, totalCases, newCases;
-        private RecyclerViewClickListener listener;
+        private Listener listener;
+        private ImageView flag;
 
-        public CountryViewHolder(@NonNull View itemView, RecyclerViewClickListener listener) {
+        public CountryViewHolder(@NonNull View itemView, Listener listener) {
             super(itemView);
             this.listener = listener;
             itemView.setOnClickListener(this);
             country = itemView.findViewById(R.id.tvCountry);
             totalCases = itemView.findViewById(R.id.tvTotalCases);
             newCases = itemView.findViewById(R.id.tvNewCases);
+            flag = itemView.findViewById(R.id.ivFlag);
         }
 
         @Override
@@ -104,20 +114,31 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         }
     }
 
+    public void setData(List<Country> data){
+        mCountriesFiltered.clear();
+        mCountriesFiltered.addAll(data);
+        notifyDataSetChanged();
+    }
+
     public void sort(final int sortMethod) {
+        // sort the list
         if (mCountriesFiltered.size() > 0) {
             Collections.sort(mCountriesFiltered, new Comparator<Country>() {
                 @Override
                 public int compare(Country o1, Country o2) {
-                    if(sortMethod == SORT_METHOD_NEW) {
+                    if (sortMethod == 1) {
+                        // sort by new cases
                         return o2.getNewConfirmed().compareTo(o1.getNewConfirmed());
-                    } else if(sortMethod == SORT_METHOD_TOTAL) {
-                        return o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
+                    } else {
+                        // sort by total cases
+                        o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                     }
+                    // default
                     return o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                 }
             });
         }
+        // notify the adapter on changed
         notifyDataSetChanged();
     }
 }
