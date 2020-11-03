@@ -47,7 +47,6 @@ public class DetailActivity extends AppCompatActivity {
         Gson gson = new Gson();
         Response response = gson.fromJson(Response.json, Response.class);
         List<Country> countries = response.getCountries();
-
         for(final Country country : countries) {
             if(country.getCountryCode().equals(countryCode)) {
                 DecimalFormat df = new DecimalFormat( "#,###,###,###" );

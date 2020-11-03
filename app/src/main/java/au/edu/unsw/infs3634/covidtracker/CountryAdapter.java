@@ -12,17 +12,18 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryViewHolder> implements Filterable {
+    public static final int SORT_METHOD_NEW = 1;
+    public static final int SORT_METHOD_TOTAL = 2;
     private List<Country> mCountries;
-    private Listener mListener;
     private List<Country> mCountriesFiltered;
+    private RecyclerViewClickListener mListener;
 
-    public CountryAdapter(List<Country> countries, Listener listener) {
+    public CountryAdapter(List<Country> countries, RecyclerViewClickListener listener) {
         mCountries = countries;
         mCountriesFiltered = countries;
         mListener = listener;
@@ -33,17 +34,17 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence constraint) {
-                String searchQuery = constraint.toString();
-                if (searchQuery.isEmpty()) {
+                String charString = constraint.toString();
+                if(charString.isEmpty()) {
                     mCountriesFiltered = mCountries;
                 } else {
-                    List<Country> filterList = new ArrayList<>();
-                    for (Country country : mCountries) {
-                        if (country.getCountry().toLowerCase().contains(searchQuery.toLowerCase())) {
-                            filterList.add(country);
+                    ArrayList<Country> filteredList = new ArrayList<>();
+                    for(Country country : mCountries) {
+                        if(country.getCountry().toLowerCase().contains(charString.toLowerCase())) {
+                            filteredList.add(country);
                         }
                     }
-                    mCountriesFiltered = filterList;
+                    mCountriesFiltered = filteredList;
                 }
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = mCountriesFiltered;
@@ -58,26 +59,24 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         };
     }
 
-    public interface Listener {
+    public interface RecyclerViewClickListener {
         void onClick(View view, String countryCode);
     }
 
     @NonNull
     @Override
-    public CountryAdapter.CountryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(
-                R.layout.country_list_row, parent, false);
-        CountryViewHolder holder = new CountryViewHolder(v, mListener);
-        return holder;
+    public CountryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.country_list_row, parent, false);
+        return new CountryViewHolder(v, mListener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CountryAdapter.CountryViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CountryViewHolder holder, int position) {
         Country country = mCountriesFiltered.get(position);
-        DecimalFormat df = new DecimalFormat("#,###,###,###");
+        DecimalFormat df = new DecimalFormat( "#,###,###,###" );
         holder.country.setText(country.getCountry());
         holder.totalCases.setText(df.format(country.getTotalConfirmed()));
-        holder.newCases.setText(df.format(country.getNewConfirmed()));
+        holder.newCases.setText("+" + df.format(country.getNewConfirmed()));
         holder.itemView.setTag(country.getCountryCode());
     }
 
@@ -86,11 +85,11 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         return mCountriesFiltered.size();
     }
 
-    public class CountryViewHolder extends RecyclerView.ViewHolder implements  View.OnClickListener {
+    public static class CountryViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView country, totalCases, newCases;
-        private Listener listener;
+        private RecyclerViewClickListener listener;
 
-        public CountryViewHolder(@NonNull View itemView, Listener listener) {
+        public CountryViewHolder(@NonNull View itemView, RecyclerViewClickListener listener) {
             super(itemView);
             this.listener = listener;
             itemView.setOnClickListener(this);
@@ -106,21 +105,19 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
     }
 
     public void sort(final int sortMethod) {
-
         if (mCountriesFiltered.size() > 0) {
             Collections.sort(mCountriesFiltered, new Comparator<Country>() {
                 @Override
                 public int compare(Country o1, Country o2) {
-                    if (sortMethod == 1) {
+                    if(sortMethod == SORT_METHOD_NEW) {
                         return o2.getNewConfirmed().compareTo(o1.getNewConfirmed());
-                    } else {
-                        o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
+                    } else if(sortMethod == SORT_METHOD_TOTAL) {
+                        return o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                     }
                     return o2.getTotalConfirmed().compareTo(o1.getTotalConfirmed());
                 }
             });
         }
-
         notifyDataSetChanged();
     }
 }

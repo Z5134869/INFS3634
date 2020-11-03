@@ -1,7 +1,6 @@
 package au.edu.unsw.infs3634.covidtracker;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
@@ -10,13 +9,16 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.SearchView;
 
 import com.google.gson.Gson;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
-    private RecyclerView.LayoutManager layoutManager;
     private CountryAdapter mAdapter;
 
     @Override
@@ -26,35 +28,31 @@ public class MainActivity extends AppCompatActivity {
 
         mRecyclerView = findViewById(R.id.rvList);
         mRecyclerView.setHasFixedSize(true);
-        layoutManager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(layoutManager);
-        CountryAdapter.Listener listener = new CountryAdapter.Listener() {
+        CountryAdapter.RecyclerViewClickListener listener = new CountryAdapter.RecyclerViewClickListener() {
             @Override
-            public void onClick(View view, String conutryCode) {
-                launchDetailActivity(conutryCode);
+            public void onClick(View view, String countryCode) {
+                launchDetailActivity(countryCode);
             }
         };
 
-
         Gson gson = new Gson();
-        Response response =gson.fromJson(Response.json, Response.class);
+        Response response = gson.fromJson(Response.json, Response.class);
         mAdapter = new CountryAdapter(response.getCountries(), listener);
+        mAdapter.sort(CountryAdapter.SORT_METHOD_TOTAL);
         mRecyclerView.setAdapter(mAdapter);
-
     }
 
     private void launchDetailActivity(String message) {
-        Intent intent = new Intent(MainActivity.this, DetailActivity.class);
+        Intent intent = new Intent(this, DetailActivity.class);
         intent.putExtra(DetailActivity.INTENT_MESSAGE, message);
         startActivity(intent);
     }
 
-    // Menu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu_main, menu);
-        SearchView searchView = (SearchView) menu.findItem(R.id.app_bar_search).getActionView();
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -71,15 +69,19 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.sort_new:
-                mAdapter.sort(1);
+                mAdapter.sort(CountryAdapter.SORT_METHOD_NEW);
                 return true;
             case R.id.sort_total:
-                mAdapter.sort(2);
+                mAdapter.sort(CountryAdapter.SORT_METHOD_TOTAL);
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
 }

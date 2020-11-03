@@ -1,11 +1,8 @@
+
 package au.edu.unsw.infs3634.covidtracker;
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-
-
-import java.util.List;
 
 public class Country {
 
@@ -129,19 +126,6 @@ public class Country {
 
     public void setPremium(Premium premium) {
         this.premium = premium;
-    }
-
-
-    public static Country getCountry(String countryCode){
-        Gson gson = new Gson();
-        Response response = gson.fromJson(Response.json, Response.class);
-        List<Country> countries = response.getCountries();
-        for(final Country country: countries){
-            if(country.getCountryCode().equals(countryCode)){
-                return country;
-            }
-        }
-        return countries.get(countries.size()-1);
     }
 
 }
