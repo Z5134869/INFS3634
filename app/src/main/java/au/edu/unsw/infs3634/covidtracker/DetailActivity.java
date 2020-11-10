@@ -3,22 +3,20 @@ package au.edu.unsw.infs3634.covidtracker;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.room.Room;
 
-import java.util.List;
+import com.bumptech.glide.Glide;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import java.util.concurrent.Executors;
 
 public class DetailActivity extends AppCompatActivity {
     private static final String TAG = "DetailActivity";
+    private CountryDatabase mDb;
     public static final String INTENT_MESSAGE = "au.edu.unsw.infs3634.covidtracker.intent_message";
     private TextView mCountry;
     private TextView mNewCases;
@@ -28,6 +26,7 @@ public class DetailActivity extends AppCompatActivity {
     private TextView mNewRecovered;
     private TextView mTotalRecovered;
     private ImageView mSearch;
+    private ImageView mFlag;
 
 
     @Override
@@ -35,31 +34,25 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        mCountry = findViewById(R.id.tvCountryName);
+        mNewCases = findViewById(R.id.tvNewCasesDesc);
+        mTotalCases = findViewById(R.id.tvTotalCasesDesc);
+        mNewDeaths = findViewById(R.id.tvNewDeathsDesc);
+        mTotalDeaths = findViewById(R.id.tvTotalDeathsDesc);
+        mNewRecovered = findViewById(R.id.tvNewRecoveredDesc);
+        mTotalRecovered = findViewById(R.id.tvTotalRecoveredDesc);
+        mFlag = findViewById(R.id.ivFlag);
+
+
         Intent intent = getIntent();
         String countryCode = intent.getStringExtra(INTENT_MESSAGE);
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://api.covid19api.com")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        CovidService service = retrofit.create(CovidService.class);
-        Call<Response> responseCall = service.getResponse();
-        responseCall.enqueue(new Callback<Response>() {
+        // create a Room database
+        mDb = Room.databaseBuilder(getApplicationContext(), CountryDatabase.class, "country-database").build();
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
             @Override
-            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
-                Log.d(TAG, "onResponse: API call succeeded!");
-                List<Country> countries = response.body().getCountries();
-                final Country country = Country.getCountry(countries, countryCode);
-
-                mCountry = findViewById(R.id.tvCountry);
-                mNewCases = findViewById(R.id.tvNewCasesDesc);
-                mTotalCases = findViewById(R.id.tvTotalCasesDesc);
-                mNewDeaths = findViewById(R.id.tvNewDeathsDesc);
-                mTotalDeaths = findViewById(R.id.tvTotalDeathsDesc);
-                mNewRecovered = findViewById(R.id.tvNewRecoveredDesc);
-                mTotalRecovered = findViewById(R.id.tvTotalRecoveredDesc);
-
+            public void run() {
+                Country country = mDb.countryDao().getCountry(countryCode);
                 mCountry.setText(country.getCountry());
                 mNewCases.setText(String.valueOf(country.getNewConfirmed()));
                 mTotalCases.setText(String.valueOf(country.getTotalConfirmed()));
@@ -79,12 +72,40 @@ public class DetailActivity extends AppCompatActivity {
                     }
                 });
             }
-
-            @Override
-            public void onFailure(Call<Response> call, Throwable t) {
-                Log.d(TAG, "onFailure: API call failed.");
-            }
         });
+
+        Glide.with(this).load("https://www.countryflags.io/"+ countryCode + "/flat/64.png").into(mFlag);
+
+//        Retrofit retrofit = new Retrofit.Builder()
+//                .baseUrl("http://api.covid19api.com")
+//                .addConverterFactory(GsonConverterFactory.create())
+//                .build();
+//
+//        CovidService service = retrofit.create(CovidService.class);
+//        Call<Response> responseCall = service.getResponse();
+//        responseCall.enqueue(new Callback<Response>() {
+//            @Override
+//            public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
+//                Log.d(TAG, "onResponse: API call succeeded!");
+//                List<Country> countries = response.body().getCountries();
+//                final Country country = Country.findCountry(countries, countryCode);
+//
+//                mCountry = findViewById(R.id.tvCountryName);
+//                mNewCases = findViewById(R.id.tvNewCasesDesc);
+//                mTotalCases = findViewById(R.id.tvTotalCasesDesc);
+//                mNewDeaths = findViewById(R.id.tvNewDeathsDesc);
+//                mTotalDeaths = findViewById(R.id.tvTotalDeathsDesc);
+//                mNewRecovered = findViewById(R.id.tvNewRecoveredDesc);
+//                mTotalRecovered = findViewById(R.id.tvTotalRecoveredDesc);
+//
+//
+//            }
+//
+//            @Override
+//            public void onFailure(Call<Response> call, Throwable t) {
+//                Log.d(TAG, "onFailure: API call failed.");
+//            }
+//        });
 
 
 

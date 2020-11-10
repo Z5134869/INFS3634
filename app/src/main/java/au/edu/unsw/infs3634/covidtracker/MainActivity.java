@@ -1,9 +1,5 @@
 package au.edu.unsw.infs3634.covidtracker;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,10 +9,14 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.SearchView;
 
-import com.google.gson.Gson;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Room;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private RecyclerView.LayoutManager layoutManager;
     private CountryAdapter mAdapter;
+    private CountryDatabase mDb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +46,19 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        mAdapter = new CountryAdapter(new ArrayList<Country>(), listener);
+        mAdapter = new CountryAdapter(new ArrayList<Country>(), listener, getApplicationContext());
         mRecyclerView.setAdapter(mAdapter);
+
+        // create a Room database
+        mDb = Room.databaseBuilder(getApplicationContext(), CountryDatabase.class, "country-database").build();
+
+        Executors.newSingleThreadExecutor().execute(new Runnable() {
+            @Override
+            public void run() {
+                mAdapter.setData(mDb.countryDao().getCountries());
+                mAdapter.sort(2);
+            }
+        });
 
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.covid19api.com")
@@ -61,7 +73,15 @@ public class MainActivity extends AppCompatActivity {
             public void onResponse(Call<Response> call, retrofit2.Response<Response> response) {
                 Log.d(TAG, "onRsponse: API call succeeded!");
                 List<Country> countries = response.body().getCountries();
+                Executors.newSingleThreadExecutor().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDb.countryDao().deleteAll(mDb.countryDao().getCountries().toArray(new Country[0]));
+                        mDb.countryDao().insertAll(countries.toArray(new Country[0]));
+                    }
+                });
                 mAdapter.setData(countries);
+                mAdapter.sort(2);
             }
 
             @Override
@@ -72,8 +92,6 @@ public class MainActivity extends AppCompatActivity {
         // use Gson library to convert json data to java class
 //        Gson gson = new Gson();
 //        Response response = gson.fromJson(Response.json, Response.class);
-
-
     }
 
     private void launchDetailActivity(String message) {

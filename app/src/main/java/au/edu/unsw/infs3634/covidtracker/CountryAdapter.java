@@ -1,5 +1,6 @@
 package au.edu.unsw.infs3634.covidtracker;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,10 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         mCountries = countries;
         mCountriesFiltered = countries;
         mListener = listener;
+    }
+
+    public CountryAdapter(ArrayList<Country> countries, Listener listener, Context applicationContext) {
+
     }
 
     @Override
