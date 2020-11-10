@@ -34,13 +34,13 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        mCountry = findViewById(R.id.tvCountryName);
-        mNewCases = findViewById(R.id.tvNewCasesDesc);
-        mTotalCases = findViewById(R.id.tvTotalCasesDesc);
-        mNewDeaths = findViewById(R.id.tvNewDeathsDesc);
-        mTotalDeaths = findViewById(R.id.tvTotalDeathsDesc);
-        mNewRecovered = findViewById(R.id.tvNewRecoveredDesc);
-        mTotalRecovered = findViewById(R.id.tvTotalRecoveredDesc);
+        mCountry = findViewById(R.id.tvCountry);
+        mNewCases = findViewById(R.id.tvNewCases);
+        mTotalCases = findViewById(R.id.tvTotalCases);
+        mNewDeaths = findViewById(R.id.tvNewDeaths);
+        mTotalDeaths = findViewById(R.id.tvTotalDeaths);
+        mNewRecovered = findViewById(R.id.tvNewRecovered);
+        mTotalRecovered = findViewById(R.id.tvTotalRecovered);
         mFlag = findViewById(R.id.ivFlag);
 
 

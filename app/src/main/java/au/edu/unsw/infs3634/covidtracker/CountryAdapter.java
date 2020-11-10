@@ -6,10 +6,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -21,15 +24,17 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
     private List<Country> mCountries;
     private Listener mListener;
     private List<Country> mCountriesFiltered;
+    private Context context;
 
-    public CountryAdapter(List<Country> countries, Listener listener) {
+    public CountryAdapter(List<Country> countries, Listener listener ,Context context) {
         mCountries = countries;
         mCountriesFiltered = countries;
         mListener = listener;
+        this.context=context;
     }
-
-    public CountryAdapter(ArrayList<Country> countries, Listener listener, Context applicationContext) {
-
+    public CountryAdapter(List<Country> listdata, Context context) {
+        this.mCountries = listdata;
+        this.context = context;
     }
 
     @Override
@@ -62,6 +67,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         };
     }
 
+
     public interface Listener {
         void onClick(View view, String countryCode);
     }
@@ -75,6 +81,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         return holder;
     }
 
+
     @Override
     public void onBindViewHolder(@NonNull CountryAdapter.CountryViewHolder holder, int position) {
         Country country = mCountriesFiltered.get(position);
@@ -83,6 +90,10 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
         holder.totalCases.setText(df.format(country.getTotalConfirmed()));
         holder.newCases.setText(df.format(country.getNewConfirmed()));
         holder.itemView.setTag(country.getCountryCode());
+
+        Glide.with(context)
+                .load("https://www.countryflags.io/"+country.getCountryCode().toLowerCase()+"/flat/64.png")
+                .into(holder.imageView);
     }
 
     @Override
@@ -93,6 +104,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
     public class CountryViewHolder extends RecyclerView.ViewHolder implements  View.OnClickListener {
         public TextView country, totalCases, newCases;
         private Listener listener;
+        public ImageView imageView;
 
         public CountryViewHolder(@NonNull View itemView, Listener listener) {
             super(itemView);
@@ -101,6 +113,7 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
             country = itemView.findViewById(R.id.tvCountry);
             totalCases = itemView.findViewById(R.id.tvTotalCases);
             newCases = itemView.findViewById(R.id.tvNewCases);
+            imageView=itemView.findViewById(R.id.ivFlag);
         }
 
         @Override
@@ -132,4 +145,5 @@ public class CountryAdapter extends RecyclerView.Adapter<CountryAdapter.CountryV
 
         notifyDataSetChanged();
     }
+
 }
