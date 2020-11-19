@@ -16,6 +16,7 @@
         android:layout_marginStart="16dp"
         android:layout_marginLeft="16dp"
         android:scaleType="fitCenter"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:srcCompat="@mipmap/ic_launcher" />
 

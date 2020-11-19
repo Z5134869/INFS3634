@@ -44,15 +44,15 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        mCountry = findViewById(R.id.tvCountryName);
-        mNewCases = findViewById(R.id.tvNewCasesDesc);
-        mTotalCases = findViewById(R.id.tvTotalCasesDesc);
-        mNewDeaths = findViewById(R.id.tvNewDeathsDesc);
-        mTotalDeaths = findViewById(R.id.tvTotalDeathsDesc);
-        mNewRecovered = findViewById(R.id.tvNewRecoveredDesc);
-        mTotalRecovered = findViewById(R.id.tvTotalRecoveredDesc);
+        mCountry = findViewById(R.id.tvCountry);
+        mNewCases = findViewById(R.id.tvNewCases);
+        mTotalCases = findViewById(R.id.tvTotalCases);
+        mNewDeaths = findViewById(R.id.tvNewDeaths);
+        mTotalDeaths = findViewById(R.id.tvTotalDeaths);
+        mNewRecovered = findViewById(R.id.tvNewRecovered);
+        mTotalRecovered = findViewById(R.id.tvTotalRecovered);
         mFlag = findViewById(R.id.ivFlag);
-        mHome = findViewById(R.id.cbHome);
+        mHome= findViewById(R.id.chHome);
 
 
         Intent intent = getIntent();
@@ -82,32 +82,33 @@ public class DetailActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 });
+
                 FirebaseDatabase database = FirebaseDatabase.getInstance();
-                DatabaseReference messageRef = database.getReference(FirebaseAuth.getInstance().getUid());
-                messageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                DatabaseReference myRef = database.getReference(FirebaseAuth.getInstance().getUid());
+                myRef.addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
-                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                        String result = (String) dataSnapshot.getValue();
-                        if (result != null && result.equals(country.getCountryCode())) {
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        String result = (String) snapshot.getValue();
+                        if(result !=null&& result.equals(country.getCountryCode())){
                             mHome.setChecked(true);
-                        } else {
+                        }else{
                             mHome.setChecked(false);
-                        }
+                        };
                     }
 
                     @Override
-                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                    public void onCancelled(@NonNull DatabaseError error) {
 
                     }
                 });
                 mHome.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                     @Override
                     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                        DatabaseReference messageRef = database.getReference(FirebaseAuth.getInstance().getUid());
-                        if (isChecked) {
-                            messageRef.setValue(country.getCountryCode());
-                        } else {
-                            messageRef.setValue("");
+                        DatabaseReference myRef=database.getReference(FirebaseAuth.getInstance().getUid());
+                        if(isChecked){
+                            myRef.setValue(country.getCountryCode());
+                        }else{
+                            myRef.setValue("");
                         }
                     }
                 });
