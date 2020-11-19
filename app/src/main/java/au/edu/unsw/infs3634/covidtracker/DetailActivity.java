@@ -4,13 +4,22 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.Executors;
 
@@ -27,6 +36,7 @@ public class DetailActivity extends AppCompatActivity {
     private TextView mTotalRecovered;
     private ImageView mSearch;
     private ImageView mFlag;
+    private CheckBox mHome;
 
 
     @Override
@@ -34,14 +44,15 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        mCountry = findViewById(R.id.tvCountry);
-        mNewCases = findViewById(R.id.tvNewCases);
-        mTotalCases = findViewById(R.id.tvTotalCases);
-        mNewDeaths = findViewById(R.id.tvNewDeaths);
-        mTotalDeaths = findViewById(R.id.tvTotalDeaths);
-        mNewRecovered = findViewById(R.id.tvNewRecovered);
-        mTotalRecovered = findViewById(R.id.tvTotalRecovered);
+        mCountry = findViewById(R.id.tvCountryName);
+        mNewCases = findViewById(R.id.tvNewCasesDesc);
+        mTotalCases = findViewById(R.id.tvTotalCasesDesc);
+        mNewDeaths = findViewById(R.id.tvNewDeathsDesc);
+        mTotalDeaths = findViewById(R.id.tvTotalDeathsDesc);
+        mNewRecovered = findViewById(R.id.tvNewRecoveredDesc);
+        mTotalRecovered = findViewById(R.id.tvTotalRecoveredDesc);
         mFlag = findViewById(R.id.ivFlag);
+        mHome = findViewById(R.id.cbHome);
 
 
         Intent intent = getIntent();
@@ -69,6 +80,35 @@ public class DetailActivity extends AppCompatActivity {
                                 Uri.parse("http://www.google.com/search?q=covid "
                                         + country.getCountry()));
                         startActivity(intent);
+                    }
+                });
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference messageRef = database.getReference(FirebaseAuth.getInstance().getUid());
+                messageRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        String result = (String) dataSnapshot.getValue();
+                        if (result != null && result.equals(country.getCountryCode())) {
+                            mHome.setChecked(true);
+                        } else {
+                            mHome.setChecked(false);
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+                mHome.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        DatabaseReference messageRef = database.getReference(FirebaseAuth.getInstance().getUid());
+                        if (isChecked) {
+                            messageRef.setValue(country.getCountryCode());
+                        } else {
+                            messageRef.setValue("");
+                        }
                     }
                 });
             }
